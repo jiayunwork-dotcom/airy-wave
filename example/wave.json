@@ -1,0 +1,8 @@
+{
+  "name": "deep-water swell, H=2 m, T=8 s, h=50 m",
+  "amplitude": 1,
+  "period": 8,
+  "depth": 50,
+  "layers": 12,
+  "rho": 1025
+}

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Airy 线性波 · 波要素计算</title>
+  <style>
+    :root { --bg:#fff; --panel:#f5f7fa; --ink:#222; --accent:#1f6feb; --grid:#e3e8ef; --line:#1f6feb; }
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); }
+    header { padding:18px 24px; border-bottom:1px solid var(--grid); }
+    h1 { font-size:20px; margin:0; }
+    .sub { color:#667; font-size:13px; margin-top:4px; }
+    main { padding:20px 24px; max-width:920px; }
+    .card { background:var(--panel); border:1px solid var(--grid); border-radius:10px; padding:16px; margin-bottom:18px; }
+    .row { display:flex; gap:12px; flex-wrap:wrap; align-items:end; }
+    label { font-size:12px; color:#667; display:block; margin-bottom:4px; }
+    input { padding:8px 10px; border:1px solid var(--grid); border-radius:6px; font-size:14px; background:#fff; color:var(--ink); width:110px; }
+    button { padding:9px 16px; border:0; background:var(--accent); color:#fff; border-radius:6px; font-size:14px; cursor:pointer; }
+    .res { font-size:14px; line-height:1.9; }
+    .res b { color:var(--line); }
+    #chart { width:100%; height:360px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Airy 线性波计算器</h1>
+    <div class="sub">色散关系 ω² = g·k·tanh(k·h)；波长 λ=2π/k，相速 c=λ/T</div>
+  </header>
+  <main>
+    <div class="card">
+      <div class="row">
+        <div><label>波幅 a (m)</label><input id="a" type="number" value="1" step="0.1"></div>
+        <div><label>周期 T (s)</label><input id="t" type="number" value="8" step="1"></div>
+        <div><label>水深 h (m)</label><input id="h" type="number" value="50" step="1"></div>
+        <div><label>分层</label><input id="n" type="number" value="12" step="1"></div>
+        <div><label>密度 ρ (kg/m³)</label><input id="rho" type="number" value="1025" step="1"></div>
+        <button id="calc">计算</button>
+        <button id="load">载入示例</button>
+      </div>
+      <div class="res" id="single">—</div>
+    </div>
+
+    <div class="card">
+      <svg id="chart" viewBox="0 0 760 360"></svg>
+      <div class="res" id="note">—</div>
+    </div>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const reqBody = () => ({
+      amplitude:+ $("a").value, period:+$("t").value,
+      depth:+$("h").value, layers:+$("n").value, rho:+$("rho").value
+    });
+
+    $("calc").onclick = async () => {
+      const r = await fetch("/api/wave", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify(reqBody())
+      }).then(x => x.json());
+      if (r.error) { $("single").textContent = "错误: " + r.error; return; }
+      $("single").innerHTML =
+        `波长 λ = <b>${r.wavelength.toFixed(2)}</b> m<br>` +
+        `波数 k = <b>${r.wavenumber.toFixed(4)}</b> rad/m<br>` +
+        `相速 c = <b>${r.phase_speed.toFixed(2)}</b> m/s<br>` +
+        `深水判定: <b>${r.deep_water ? "是" : "否"}</b>`;
+      drawProfile(r.profile);
+    };
+
+    $("load").onclick = async () => {
+      const ex = await fetch("/example/wave.json").then(x => x.json());
+      $("a").value=ex.amplitude; $("t").value=ex.period;
+      $("h").value=ex.depth; $("n").value=ex.layers; $("rho").value=ex.rho;
+      $("calc").click();
+    };
+
+    function drawProfile(profile) {
+      const W=760,H=360,padL=56,padB=34,padT=14,padR=14;
+      // map z (0..depth) to y (depth at bottom). Use first point's z max.
+      const zMax = profile.length ? profile[profile.length-1].z : 1;
+      const uMax = Math.max(1e-6, ...profile.map(p=>Math.abs(p.u)));
+      const x = z => padL + (z/zMax)*(W-padL-padR);
+      const yu = v => H-padB - (v/uMax)*(H-padT-padB)/2 - (H-padT-padB)/2 + padT;
+      let svg = `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="#e3e8ef"/>`;
+      svg += `<line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="#e3e8ef"/>`;
+      let path="M";
+      profile.forEach((p,i)=>{ path += ` ${x(p.z).toFixed(1)},${yu(p.u).toFixed(1)}`; if(i<profile.length-1) path+=" L"; });
+      svg += `<path d="${path}" fill="none" stroke="#1f6feb" stroke-width="2"/>`;
+      svg += `<text x="14" y="${padT+6}" fill="#667" font-size="12">u (m/s)</text>`;
+      svg += `<text x="${padL}" y="${H-10}" fill="#667" font-size="12">高度 z (m)</text>`;
+      $("chart").innerHTML = svg;
+      $("note").innerHTML = `剖面 ${profile.length} 层：${profile.length} 个采样点，海底 z=0，水面 z=${zMax.toFixed(1)} m`;
+    }
+  </script>
+</body>
+</html>
