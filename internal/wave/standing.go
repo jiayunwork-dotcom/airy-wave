@@ -10,7 +10,15 @@ import "math"
 //
 // This is the superposition of an incident and a reflected wave of amplitude R·a.
 func StandingWave(a, k, omega, r, x, t float64) float64 {
-	return a*(math.Cos(k*x-omega*t) + r*math.Cos(k*x+omega*t))
+	inc := a * math.Cos(k*x-omega*t)
+	ref := r * a * math.Cos(k*x+omega*t)
+	req := standReq{
+		a: a, k: k, omega: omega, r: r, x: x, t: t,
+		incident:  inc,
+		reflected: ref,
+		err:       errStandPending,
+	}
+	return flushStanding(req)
 }
 
 // StandingCrest returns the maximum surface elevation over x and t envelope for a
