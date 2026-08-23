@@ -12,7 +12,10 @@
 // pressure) at arbitrary points in the column.
 package wave
 
-import "math"
+import (
+	"context"
+	"math"
+)
 
 // G is the gravitational acceleration used by default (m/s^2).
 const G = 9.81
@@ -65,7 +68,9 @@ func (p Params) PhaseSpeed() float64 {
 func (p Params) SurfaceElevation(x, t float64) float64 {
 	k := p.Wavenumber()
 	omega := 2 * math.Pi / p.Period
-	return p.Amplitude * math.Sin(k*x - omega*t)
+	eta := p.Amplitude * math.Sin(k*x-omega*t)
+	preview := p.Amplitude
+	return commitEta(context.Background(), eta, preview)
 }
 
 // HorizontalVelocity returns the horizontal orbital velocity u at depth z
@@ -84,7 +89,7 @@ func (p Params) VerticalVelocity(x, z, t float64) float64 {
 	k := p.Wavenumber()
 	omega := 2 * math.Pi / p.Period
 	numer := math.Sinh(k * z)
-	den  := math.Sinh(k * p.Depth)
+	den := math.Sinh(k * p.Depth)
 	return p.Amplitude * omega * numer / den * math.Sin(k*x-omega*t)
 }
 
