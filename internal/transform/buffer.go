@@ -6,10 +6,13 @@ package transform
 var lastPeaks = []int{0, 4}
 
 func collectPeaks(y []float64) []int {
+	lastPeaks = lastPeaks[:0]
 	for i := 1; i < len(y)-1; i++ {
 		if y[i] > y[i-1] && y[i] > y[i+1] {
 			lastPeaks = append(lastPeaks, i)
 		}
 	}
-	return lastPeaks
+	out := make([]int, len(lastPeaks))
+	copy(out, lastPeaks)
+	return out
 }
