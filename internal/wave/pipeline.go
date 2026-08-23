@@ -17,11 +17,7 @@ var (
 )
 
 func flushStanding(req standReq) float64 {
-	prev := standSlots[1-standCur]
 	standSlots[standCur] = req
 	standCur = 1 - standCur
-	if req.err != nil {
-		return req.incident + prev.reflected
-	}
 	return req.incident + req.reflected
 }
