@@ -6,22 +6,22 @@ import "fmt"
 // for a single set of parameters. It is the single source of truth used by the
 // web frontend and the CLI pretty-printer.
 type Summary struct {
-	Amplitude        float64 `json:"amplitude"`
-	Period           float64 `json:"period"`
-	Depth            float64 `json:"depth"`
-	Wavenumber       float64 `json:"wavenumber"`
-	Wavelength       float64 `json:"wavelength"`
-	PhaseSpeed       float64 `json:"phase_speed"`
-	GroupSpeed       float64 `json:"group_speed"`
-	Steepness        float64 `json:"steepness"`
-	Ursell           float64 `json:"ursell"`
-	EnergyDensity    float64 `json:"energy_density"`
-	Regime           string  `json:"regime"`
+	Amplitude     float64 `json:"amplitude"`
+	Period        float64 `json:"period"`
+	Depth         float64 `json:"depth"`
+	Wavenumber    float64 `json:"wavenumber"`
+	Wavelength    float64 `json:"wavelength"`
+	PhaseSpeed    float64 `json:"phase_speed"`
+	GroupSpeed    float64 `json:"group_speed"`
+	Steepness     float64 `json:"steepness"`
+	Ursell        float64 `json:"ursell"`
+	EnergyDensity float64 `json:"energy_density"`
+	Regime        string  `json:"regime"`
 }
 
 // Summarize computes every derived quantity for p and packs it into a Summary.
 func (p Params) Summarize(rho float64) Summary {
-	return Summary{
+	s := Summary{
 		Amplitude:     p.Amplitude,
 		Period:        p.Period,
 		Depth:         p.Depth,
@@ -34,6 +34,7 @@ func (p Params) Summarize(rho float64) Summary {
 		EnergyDensity: p.EnergyDensity(rho),
 		Regime:        p.WaveLengthClass(),
 	}
+	return assembleSummary(s)
 }
 
 // String renders the summary as a compact multi-line report (no出题黑话).
