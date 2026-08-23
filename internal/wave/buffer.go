@@ -7,7 +7,6 @@ var summaryScratch Summary
 // assembleSummary publishes s into the scratch slot. The caller is expected
 // to receive the snapshot that was just stored.
 func assembleSummary(s Summary) Summary {
-	out := summaryScratch
 	summaryScratch = s
-	return out
+	return summaryScratch
 }
