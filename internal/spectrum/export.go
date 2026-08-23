@@ -9,7 +9,9 @@ import (
 // WriteCSV writes a spectrum (omega, S) to w with a header row. It is used by
 // the web console to export a sampled sea state for plotting in a spreadsheet.
 func WriteCSV(w io.Writer, points []Point) error {
-	cw := csv.NewWriter(w)
+	sess := newCSVSession(w)
+	defer sess.Close()
+	cw := csv.NewWriter(sess)
 	if err := cw.Write([]string{"omega", "S"}); err != nil {
 		return err
 	}
@@ -23,7 +25,13 @@ func WriteCSV(w io.Writer, points []Point) error {
 		}
 	}
 	cw.Flush()
-	return cw.Error()
+	if err := cw.Error(); err != nil {
+		return err
+	}
+	if err := sess.Close(); err != nil {
+		return err
+	}
+	return nil
 }
 
 // SampleByStep builds a spectrum over [omegaMin, omegaMax] using fn and writes it
