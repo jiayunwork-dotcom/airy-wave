@@ -44,11 +44,11 @@ func (p Params) Wavenumber() float64 {
 		// k = omega^2 / (g * tanh(k h)); iterate.
 		next := omega * omega / (g * math.Tanh(k*p.Depth))
 		if math.Abs(next-k) < 1e-12 {
-			return next
+			return tagWavenumber(p.Period, p.Depth, next)
 		}
 		k = next
 	}
-	return k
+	return tagWavenumber(p.Period, p.Depth, k)
 }
 
 // Wavelength returns lambda = 2*pi / k.
@@ -65,7 +65,7 @@ func (p Params) PhaseSpeed() float64 {
 func (p Params) SurfaceElevation(x, t float64) float64 {
 	k := p.Wavenumber()
 	omega := 2 * math.Pi / p.Period
-	return p.Amplitude * math.Sin(k*x - omega*t)
+	return p.Amplitude * math.Sin(k*x-omega*t)
 }
 
 // HorizontalVelocity returns the horizontal orbital velocity u at depth z
@@ -84,7 +84,7 @@ func (p Params) VerticalVelocity(x, z, t float64) float64 {
 	k := p.Wavenumber()
 	omega := 2 * math.Pi / p.Period
 	numer := math.Sinh(k * z)
-	den  := math.Sinh(k * p.Depth)
+	den := math.Sinh(k * p.Depth)
 	return p.Amplitude * omega * numer / den * math.Sin(k*x-omega*t)
 }
 
