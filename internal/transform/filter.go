@@ -67,11 +67,5 @@ func MovingAverage(y []float64, w int) []float64 {
 // PeakDetect returns the indices of local maxima in y (strictly greater than
 // both neighbours).
 func PeakDetect(y []float64) []int {
-	out := make([]int, 0)
-	for i := 1; i < len(y)-1; i++ {
-		if y[i] > y[i-1] && y[i] > y[i+1] {
-			out = append(out, i)
-		}
-	}
-	return out
+	return collectPeaks(y)
 }
