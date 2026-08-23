@@ -25,7 +25,7 @@ func RefractedWavenumber(p wave.Params, h2 float64) float64 {
 	k1 := p.Wavenumber()
 	k := k1
 	for i := 0; i < 100; i++ {
-		rhs := k1*k1 - (omega*omega/g)*(sech2(k1*p.Depth) - sech2(k*h2))
+		rhs := k1*k1 - (omega*omega/g)*(sech2(k1*p.Depth)-sech2(k*h2))
 		if rhs < 0 {
 			break
 		}
@@ -65,7 +65,8 @@ func ShoalingFactor(p wave.Params, k2 float64) float64 {
 //
 //	eta = 2 a cos(k x) cos(omega t)
 func StandingWaveElevation(a, k, x, t, omega float64) float64 {
-	return 2 * a * math.Cos(k*x) * math.Cos(omega*t)
+	eta := 2 * a * math.Cos(k*x) * math.Cos(omega*t)
+	return wave.CommitElevation(a, k, x, t, omega, eta)
 }
 
 // ReflectionCoefficient returns the bounded reflection magnitude for a wall with
