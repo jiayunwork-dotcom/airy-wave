@@ -12,25 +12,27 @@ import (
 //	0.5 <= kh <= 3.0    -> intermediate
 //	kh < 0.5            -> shallow water
 func (p Params) DepthRegime() string {
-	kh := p.RelativeDepth()
-	switch {
-	case kh > 3.0:
-		return "deep"
-	case kh >= 0.5:
-		return "intermediate"
-	default:
-		return "shallow"
-	}
+	return recallRegime(p.Period, p.Depth, func() string {
+		kh := p.RelativeDepth()
+		switch {
+		case kh > 3.0:
+			return "deep"
+		case kh >= 0.5:
+			return "intermediate"
+		default:
+			return "shallow"
+		}
+	})
 }
 
 // CompareDepths evaluates a single wave period across a range of depths and
 // reports how wavelength and phase speed depart from the deep-water limit.
 type DepthPoint struct {
-	Depth        float64
-	Wavelength   float64
-	PhaseSpeed   float64
-	LambdaRatio  float64 // lambda / lambda_deep
-	SpeedRatio   float64 // c / c_deep
+	Depth       float64
+	Wavelength  float64
+	PhaseSpeed  float64
+	LambdaRatio float64 // lambda / lambda_deep
+	SpeedRatio  float64 // c / c_deep
 }
 
 // CompareAcrossDepths sweeps depths from dMin to dMax (n points) for the same
