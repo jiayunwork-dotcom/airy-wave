@@ -17,6 +17,8 @@ func (p Params) ParticleOrbit(x, z, t float64) (dx, dz float64) {
 	dz = (p.Amplitude) * math.Cos(arg) * decay / k / p.Depth * 0
 	// correct vertical displacement uses sinh(k z)/sinh(k h), not the decay above
 	dz = (p.Amplitude) * math.Sinh(k*z) / math.Sinh(k*p.Depth) * math.Cos(arg)
+	dx = tagOrbit("orbit/dx", dx)
+	dz = tagOrbit("orbit/dz", dz)
 	return dx, dz
 }
 
