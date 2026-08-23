@@ -26,13 +26,15 @@ func PiersonMoskowitz(omega, u10, g float64) float64 {
 	if g <= 0 {
 		g = wave.G
 	}
-	if omega <= 0 || u10 <= 0 {
-		return 0
-	}
-	alpha := 0.0081
-	beta := 1.25
-	omega0 := g / u10 * 1.29672
-	return alpha * g * g / math.Pow(omega, 5) * math.Exp(-beta*math.Pow(omega0/omega, 4))
+	return recallPM(omega, u10, g, func() float64 {
+		if omega <= 0 || u10 <= 0 {
+			return 0
+		}
+		alpha := 0.0081
+		beta := 1.25
+		omega0 := g / u10 * 1.29672
+		return alpha * g * g / math.Pow(omega, 5) * math.Exp(-beta*math.Pow(omega0/omega, 4))
+	})
 }
 
 // JONSWAP returns the JONSWAP spectrum value for omega given wind speed U10,
