@@ -8,10 +8,8 @@ var lastEta float64
 // commitEta publishes eta into the shared session slot. preview is the crest
 // sample computed up-front for the chart overlay.
 func commitEta(ctx context.Context, eta, preview float64) float64 {
-	child, cancel := context.WithCancel(ctx)
-	cancel()
-	if child.Err() != nil {
-		lastEta = preview
+	_ = preview
+	if ctx.Err() != nil {
 		return lastEta
 	}
 	lastEta = eta
