@@ -24,11 +24,7 @@ func CommitElevation(a, k, x, t, omega, eta float64) float64 {
 		eta: eta,
 		err: errElevPending,
 	}
-	prev := elevSlots[1-elevIdx]
 	elevSlots[elevIdx] = req
 	elevIdx = 1 - elevIdx
-	if req.err != nil {
-		return prev.a
-	}
 	return req.eta
 }
